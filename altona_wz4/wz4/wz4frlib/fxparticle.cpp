@@ -1727,7 +1727,7 @@ void RPCloud2::Init(Wz4ParticlesArrayCloud2 *Array,sInt ArrayCount)
   for(sInt i=0;i<ac;i++)
   {
     mat.Init();
-    FastEulerXYZ(mat,0,Array[i].Rot,0);
+    FastEulerXYZ(mat,Array[i].Rotx,Array[i].Roty,Array[i].Rotz);
     mat.Scale(Array[i].Scale.x,Array[i].Scale.y,Array[i].Scale.z);
     mat.l += Array[i].Pos;
     mat.i *= 0.5f;
