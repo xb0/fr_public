@@ -167,6 +167,7 @@ public:
   sBool IsDegenerateFace(sInt face) const; // degenerate face: one in which a vertex position occurs twice
   void RemoveDegenerateFaces();
   void ConvertFrom(class ChaosMesh *);
+  void FromVertex(Wz4Mesh * inputMesh, Wz4Mesh * outputMesh, float random);
 
   void InsertClusterAfter(Wz4MeshCluster *cl,sInt pos);
   void SplitClustersAnim(sInt maxMats); // split clusters for bone vertex shader

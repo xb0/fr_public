@@ -964,6 +964,27 @@ operator Wz4Mesh Center(Wz4Mesh)
 
 /****************************************************************************/
 
+operator Wz4Mesh FromVertex(Wz4Mesh, Wz4Mesh)
+{
+  column = 1;
+  flags = passinput|passoutput;
+  parameter
+  {
+    float InputRandom(0..1 step 0.001)=1;
+	group "Output";
+    float31 Scale(0..1024 step 0.01) = { 1,1,1 };
+    float30 Rotate(-1024..1024 step 0.001) = { 0,0,0 };
+    float31 Translate(-1024..1024 step 0.01) = { 0,0,0 };
+  }
+  code
+  {
+	out->FromVertex(in0, in1, para->InputRandom);
+    out->Flush();
+  }
+}
+
+/****************************************************************************/
+
 operator Wz4Mesh SelectGrow(Wz4Mesh)
 {
   column = 3;

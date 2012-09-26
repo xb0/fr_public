@@ -2878,6 +2878,74 @@ void Wz4Mesh::SelFacesToVertices(sBool outputType, sInt addToInput, sF32 value, 
 
 /****************************************************************************/
 
+void Wz4Mesh::FromVertex(Wz4Mesh * inputMesh, Wz4Mesh * outputMesh, float random)
+{
+  Wz4MeshVertex *v;
+  sArray<sVector31> ListVertices;
+  sVector31 * vect;
+
+  // get unique vertices of input mesh
+  sFORALL(inputMesh->Vertices, v)
+  {
+    if(!sContains(ListVertices, v->Pos))
+      ListVertices.AddTail(v->Pos);
+  }
+
+  // delete current mesh
+  this->Clear();
+
+  // replace each vertex with the output mesh
+  sMatrix34 mat;
+  sSRT srt;
+  sFORALL(ListVertices, vect)
+  {
+    srt.Translate = *vect;
+    srt.Scale = sVector31(1);
+    srt.Rotate = sVector30(0);
+    srt.MakeMatrix(mat);
+
+    Wz4Mesh m;
+    m.CopyFrom(outputMesh);
+    m.Transform(mat);
+    //this->Add(&m);
+
+    // add mesh (same code as Add() method, but incredible more faster to copy it here)
+    //---------------------------------------------------------------------------------------------
+    Wz4Mesh *add = &m;
+
+    sInt v0 = Vertices.GetCount();
+    sInt f0 = Faces.GetCount();
+    sInt c0 = Clusters.GetCount();
+
+    Vertices.HintSize(add->Vertices.GetCount());
+    Vertices.Add(add->Vertices);
+    Faces.HintSize(add->Faces.GetCount());
+    Faces.Add(add->Faces);
+
+    Wz4MeshCluster *cl;
+    Clusters.HintSize(add->Clusters.GetCount());
+    sFORALL(add->Clusters,cl)
+    {
+      Wz4MeshCluster *ncl = new Wz4MeshCluster;
+      ncl->Mtrl = cl->Mtrl; cl->Mtrl->AddRef();
+      Clusters.AddTail(ncl);
+    }
+
+    for(sInt i=f0;i<Faces.GetCount();i++)
+    {
+      Wz4MeshFace *mf = &Faces[i];
+      mf->Cluster += c0;
+      for(sInt i=0;i<mf->Count;i++)
+        mf->Vertex[i] += v0;
+    }
+
+    MergeClusters();
+    //---------------------------------------------------------------------------------------------
+  }
+}
+
+/****************************************************************************/
+
 void Wz4Mesh::SelectGrow(Wz4MeshFaceConnect *adj, sInt amount, sInt power, sF32 range)
 {
   Wz4MeshFace *f;
