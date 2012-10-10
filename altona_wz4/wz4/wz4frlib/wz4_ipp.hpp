@@ -339,5 +339,21 @@ public:
 
 /****************************************************************************/
 
+class RNEmboss : public Wz4RenderNode
+{
+  sMaterial *Mtrl;
+public:
+  RNEmboss();
+  ~RNEmboss();
+
+  Wz4RenderParaEmboss Para,ParaBase;
+  Wz4RenderAnimEmboss Anim;
+
+  void Simulate(Wz4RenderContext *);
+  void Render(Wz4RenderContext *);
+};
+
+/****************************************************************************/
+
 #endif // FILE_WZ4FRLIB_WZ4_IPP_HPP
 

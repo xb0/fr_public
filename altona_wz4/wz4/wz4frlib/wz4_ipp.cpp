@@ -1790,3 +1790,57 @@ void RNSwirl::Render(Wz4RenderContext *ctx)
     sRTMan->Release(dest);
   }
 }
+
+/****************************************************************************/
+
+RNEmboss::RNEmboss()
+{
+  Anim.Init(Wz4RenderType->Script);
+  Mtrl = new Wz4IppEmboss();
+  Mtrl->Flags = sMTRL_ZOFF|sMTRL_CULLOFF;
+  Mtrl->TFlags[0] = sMTF_LEVEL2 | sMTF_CLAMP | sMTF_EXTERN;
+  Mtrl->Prepare(sVertexFormatBasic);
+}
+
+RNEmboss::~RNEmboss()
+{
+  delete Mtrl;
+}
+
+void RNEmboss::Simulate(Wz4RenderContext *ctx)
+{
+  Para = ParaBase;
+  Anim.Bind(ctx->Script,&Para);
+  SimulateCalc(ctx);
+  SimulateChilds(ctx);
+}
+
+void RNEmboss::Render(Wz4RenderContext *ctx)
+{
+  RenderChilds(ctx);
+
+  if((ctx->RenderMode & sRF_TARGET_MASK)==sRF_TARGET_MAIN)
+  {
+    sCBuffer<Wz4IppVSPara> cbv;
+    sCBuffer<Wz4IppEmbossPara> cbp;
+
+    sTexture2D *src = sRTMan->ReadScreen();
+    sTexture2D *dest = sRTMan->WriteScreen();
+    sRTMan->SetTarget(dest);
+    ctx->IppHelper->GetTargetInfo(cbv.Data->mvp);
+
+    cbp.Data->Shift.Init(Para.Shift[0], Para.Shift[1], 0, 0);
+    cbp.Data->Power.Init(Para.Power[0], Para.Power[1], 0, 0);
+    cbp.Data->Master.Init(Para.Master, 0, 0, 0);
+    cbp.Data->ColorMode.Init(Para.ColorMode, 0, 0, 0);
+    cbp.Data->Angle.Init(Para.Angle, 0, 0, 0);
+
+    Mtrl->Texture[0] = src;
+    Mtrl->Set(&cbv,&cbp);
+    ctx->IppHelper->DrawQuad(dest,src);
+    Mtrl->Texture[0] = 0;
+
+    sRTMan->Release(src);
+    sRTMan->Release(dest);
+  }
+}

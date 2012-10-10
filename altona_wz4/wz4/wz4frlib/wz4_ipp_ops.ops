@@ -507,3 +507,28 @@ operator Wz4Render Swirl(Wz4Render)
 	out->AddChilds(cmd,para->Renderpass);
   }
 }
+
+/****************************************************************************/
+
+operator Wz4Render Emboss(Wz4Render)
+{
+  column = 4;
+  parameter
+  {
+    int Renderpass(-127..127);
+	flags ColorMode("grey|color")=1;
+    anim float Shift[2](-1024..1024 step 0.001) = 0.003;
+	anim float Power[2](-1024..1024 step 0.001) = 2.7;
+	anim float Master(-1024..1024 step 0.001) = 3.0;
+	anim float Angle(-1024..1024 step 0.001) = 0;
+
+    group "Animation Script"; overbox overlabel linenumber lines 5 string Script;
+  }
+  code
+  {
+	RNEmboss *node = new RNEmboss();
+	node->ParaBase = node->Para = *para;
+	out->RootNode = node;
+	out->AddChilds(cmd,para->Renderpass);
+  }
+}
