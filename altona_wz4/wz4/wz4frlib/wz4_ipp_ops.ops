@@ -482,3 +482,28 @@ operator Wz4Render Pixelate(Wz4Render)
 	out->AddChilds(cmd,para->Renderpass);
   }
 }
+
+/****************************************************************************/
+
+operator Wz4Render Swirl(Wz4Render)
+{
+  column = 4;
+  parameter
+  {
+    int Renderpass(-127..127);
+	flags Filter("*0trilinear|aniso|point|bilinear:*4tile|clamp|mirror|border_black|border_white");
+	int Iteration(1..16 step 1) = 1;
+    anim float Center[2](-1024..1024 step 0.01) = 0.5;
+	anim float Distance(-1024..1024 step 0.001) = 0;
+	anim float Zoom(-1024..1024 step 0.01) = 1;
+
+    group "Animation Script"; overbox overlabel linenumber lines 5 string Script;
+  }
+  code
+  {
+	RNSwirl *node = new RNSwirl(para->Filter);
+	node->ParaBase = node->Para = *para;
+	out->RootNode = node;
+	out->AddChilds(cmd,para->Renderpass);
+  }
+}

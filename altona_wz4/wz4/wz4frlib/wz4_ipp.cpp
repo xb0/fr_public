@@ -1737,3 +1737,56 @@ void RNPixelate::Render(Wz4RenderContext *ctx)
     sRTMan->Release(dest);
   }
 }
+
+/****************************************************************************/
+
+RNSwirl::RNSwirl(sInt tFlag)
+{
+  Anim.Init(Wz4RenderType->Script);
+  Mtrl = new Wz4IppSwirl();
+  Mtrl->Flags = sMTRL_ZOFF|sMTRL_CULLOFF;
+  Mtrl->TFlags[0] = sMTF_LEVEL2 | sConvertOldUvFlags(tFlag) | sMTF_EXTERN;
+  Mtrl->Prepare(sVertexFormatBasic);
+}
+
+RNSwirl::~RNSwirl()
+{
+  delete Mtrl;
+}
+
+void RNSwirl::Simulate(Wz4RenderContext *ctx)
+{
+  Para = ParaBase;
+  Anim.Bind(ctx->Script,&Para);
+  SimulateCalc(ctx);
+  SimulateChilds(ctx);
+}
+
+void RNSwirl::Render(Wz4RenderContext *ctx)
+{
+  RenderChilds(ctx);
+
+  if((ctx->RenderMode & sRF_TARGET_MASK)==sRF_TARGET_MAIN)
+  {
+    sCBuffer<Wz4IppVSPara> cbv;
+    sCBuffer<Wz4IppSwirlPara> cbp;
+
+    sTexture2D *src = sRTMan->ReadScreen();
+    sTexture2D *dest = sRTMan->WriteScreen();
+    sRTMan->SetTarget(dest);
+    ctx->IppHelper->GetTargetInfo(cbv.Data->mvp);
+
+    cbp.Data->center.Init(Para.Center[0], Para.Center[1], 0, 0);
+    cbp.Data->iteration.Init(Para.Iteration, 0, 0, 0);
+    cbp.Data->distance.Init(Para.Distance*sPI2F, 0, 0, 0);
+    cbp.Data->zoom.Init(Para.Zoom, 0, 0, 0);
+
+    Mtrl->Texture[0] = src;
+    Mtrl->Set(&cbv,&cbp);
+    ctx->IppHelper->DrawQuad(dest,src);
+    Mtrl->Texture[0] = 0;
+
+    sRTMan->Release(src);
+    sRTMan->Release(dest);
+  }
+}

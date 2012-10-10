@@ -323,5 +323,21 @@ public:
 
 /****************************************************************************/
 
+class RNSwirl : public Wz4RenderNode
+{
+  sMaterial *Mtrl;
+public:
+  RNSwirl(sInt tFlag);
+  ~RNSwirl();
+
+  Wz4RenderParaSwirl Para,ParaBase;
+  Wz4RenderAnimSwirl Anim;
+
+  void Simulate(Wz4RenderContext *);
+  void Render(Wz4RenderContext *);
+};
+
+/****************************************************************************/
+
 #endif // FILE_WZ4FRLIB_WZ4_IPP_HPP
 
