@@ -462,3 +462,23 @@ operator Wz4Render Distort(Wz4Render)
 	out->AddChilds(cmd,para->Renderpass);
   }
 }
+
+/****************************************************************************/
+
+operator Wz4Render Pixelate(Wz4Render)
+{
+  column = 4;
+  parameter
+  {
+    int Renderpass(-127..127);
+    anim float Strength[2](-1024..1024 step 0.1) = 15;
+    group "Animation Script"; overbox overlabel linenumber lines 5 string Script;
+  }
+  code
+  {
+	RNPixelate *node = new RNPixelate();
+	node->ParaBase = node->Para = *para;
+	out->RootNode = node;
+	out->AddChilds(cmd,para->Renderpass);
+  }
+}

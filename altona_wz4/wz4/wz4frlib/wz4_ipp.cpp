@@ -1687,3 +1687,53 @@ void RNDistort::Render(Wz4RenderContext *ctx)
     sRTMan->Release(dest);
   }
 }
+
+/****************************************************************************/
+
+RNPixelate::RNPixelate()
+{
+  Anim.Init(Wz4RenderType->Script);
+  Mtrl = new Wz4IppPixelate();
+  Mtrl->Flags = sMTRL_ZOFF|sMTRL_CULLOFF;
+  Mtrl->TFlags[0] = sMTF_LEVEL2 | sMTF_CLAMP | sMTF_EXTERN;
+  Mtrl->Prepare(sVertexFormatBasic);
+}
+
+RNPixelate::~RNPixelate()
+{
+  delete Mtrl;
+}
+
+void RNPixelate::Simulate(Wz4RenderContext *ctx)
+{
+  Para = ParaBase;
+  Anim.Bind(ctx->Script,&Para);
+  SimulateCalc(ctx);
+  SimulateChilds(ctx);
+}
+
+void RNPixelate::Render(Wz4RenderContext *ctx)
+{
+  RenderChilds(ctx);
+
+  if((ctx->RenderMode & sRF_TARGET_MASK)==sRF_TARGET_MAIN)
+  {
+    sCBuffer<Wz4IppVSPara> cbv;
+    sCBuffer<Wz4IppPixelatePara> cbp;
+
+    sTexture2D *src = sRTMan->ReadScreen();
+    sTexture2D *dest = sRTMan->WriteScreen();
+    sRTMan->SetTarget(dest);
+    ctx->IppHelper->GetTargetInfo(cbv.Data->mvp);
+
+    cbp.Data->strength.Init(Para.Strength[0], Para.Strength[1], 0, 0);
+
+    Mtrl->Texture[0] = src;
+    Mtrl->Set(&cbv,&cbp);
+    ctx->IppHelper->DrawQuad(dest,src);
+    Mtrl->Texture[0] = 0;
+
+    sRTMan->Release(src);
+    sRTMan->Release(dest);
+  }
+}

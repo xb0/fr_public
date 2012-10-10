@@ -307,5 +307,21 @@ public:
 
 /****************************************************************************/
 
+class RNPixelate : public Wz4RenderNode
+{
+  sMaterial *Mtrl;
+public:
+  RNPixelate();
+  ~RNPixelate();
+
+  Wz4RenderParaPixelate Para,ParaBase;
+  Wz4RenderAnimPixelate Anim;
+
+  void Simulate(Wz4RenderContext *);
+  void Render(Wz4RenderContext *);
+};
+
+/****************************************************************************/
+
 #endif // FILE_WZ4FRLIB_WZ4_IPP_HPP
 
