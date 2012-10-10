@@ -291,5 +291,21 @@ public:
 
 /****************************************************************************/
 
+class RNDistort : public Wz4RenderNode
+{
+  sMaterial *Mtrl;
+public:
+  RNDistort(sInt tFlag);
+  ~RNDistort();
+
+  Wz4RenderParaDistort Para,ParaBase;
+  Wz4RenderAnimDistort Anim;
+
+  void Simulate(Wz4RenderContext *);
+  void Render(Wz4RenderContext *);
+};
+
+/****************************************************************************/
+
 #endif // FILE_WZ4FRLIB_WZ4_IPP_HPP
 

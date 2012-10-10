@@ -432,3 +432,33 @@ operator Wz4Render ColorMath(Wz4Render)
 	out->AddChilds(cmd,para->Renderpass);
   }
 }
+
+/****************************************************************************/
+
+operator Wz4Render Distort(Wz4Render)
+{
+  column = 4;
+  parameter
+  {
+	int Renderpass(-127..127);
+	flags Filter("*0trilinear|aniso|point|bilinear:*4tile|clamp|mirror|border_black|border_white");
+	anim float Angle(-4..4 step 0.001) = 0;
+	group "Sin";
+	anim float SinAmplitude(-1024..1024 step 0.001) = 0.025;
+	anim float SinPeriod(-1024..1024 step 0.01) = 100;
+	anim float SinPhase[2](-1024..1024 step 0.01) = 0;
+	group "Cos";
+	anim float CosAmplitude(-1024..1024 step 0.001) = 0.0;
+	anim float CosPeriod(-1024..1024 step 0.01) = 0;
+	anim float CosPhase[2](-1024..1024 step 0.01) = 0;
+
+	group "Animation Script"; overbox overlabel linenumber lines 5 string Script;
+  }
+  code
+  {
+	RNDistort *node = new RNDistort(para->Filter);
+	node->ParaBase = node->Para = *para;
+	out->RootNode = node;
+	out->AddChilds(cmd,para->Renderpass);
+  }
+}

@@ -1631,3 +1631,59 @@ void RNColorMath::Render(Wz4RenderContext *ctx)
 
 
 }
+
+/****************************************************************************/
+
+RNDistort::RNDistort(sInt tFlag)
+{
+  Anim.Init(Wz4RenderType->Script);
+  Mtrl = new Wz4IppDistort();
+  Mtrl->Flags = sMTRL_ZOFF|sMTRL_CULLOFF;
+  Mtrl->TFlags[0] = sMTF_LEVEL2 | sConvertOldUvFlags(tFlag) | sMTF_EXTERN;
+  Mtrl->Prepare(sVertexFormatBasic);
+}
+
+RNDistort::~RNDistort()
+{
+  delete Mtrl;
+}
+
+void RNDistort::Simulate(Wz4RenderContext *ctx)
+{
+  Para = ParaBase;
+  Anim.Bind(ctx->Script,&Para);
+  SimulateCalc(ctx);
+  SimulateChilds(ctx);
+}
+
+void RNDistort::Render(Wz4RenderContext *ctx)
+{
+  RenderChilds(ctx);
+
+  if((ctx->RenderMode & sRF_TARGET_MASK)==sRF_TARGET_MAIN)
+  {
+    sCBuffer<Wz4IppVSPara> cbv;
+    sCBuffer<Wz4IppDistortPara> cbp;
+
+    sTexture2D *src = sRTMan->ReadScreen();
+    sTexture2D *dest = sRTMan->WriteScreen();
+    sRTMan->SetTarget(dest);
+    ctx->IppHelper->GetTargetInfo(cbv.Data->mvp);
+
+    cbp.Data->angle.Init(Para.Angle*sPI2F, 0, 0, 0);
+    cbp.Data->sinamplitude.Init(Para.SinAmplitude, 0, 0, 0);
+    cbp.Data->sinperiod.Init(Para.SinPeriod, 0, 0, 0);
+    cbp.Data->sinphase.Init(Para.SinPhase[0], Para.SinPhase[1], 0, 0);
+    cbp.Data->cosamplitude.Init(Para.CosAmplitude, 0, 0, 0);
+    cbp.Data->cosperiod.Init(Para.CosPeriod, 0, 0, 0);
+    cbp.Data->cosphase.Init(Para.CosPhase[0], Para.CosPhase[1], 0, 0);
+
+    Mtrl->Texture[0] = src;
+    Mtrl->Set(&cbv,&cbp);
+    ctx->IppHelper->DrawQuad(dest,src);
+    Mtrl->Texture[0] = 0;
+
+    sRTMan->Release(src);
+    sRTMan->Release(dest);
+  }
+}
