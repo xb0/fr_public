@@ -691,6 +691,7 @@ operator Wz4Render ModLight(?Wz4Render)
 
     sVector31 vpos;
     sVector30 vdir;
+    sVector31 vdir2;
 
     for(sInt i=0;i<max;i++)
     {
@@ -703,25 +704,28 @@ operator Wz4Render ModLight(?Wz4Render)
 
         case 1:   // directionnal
           vpos = *ppos[i];
-          vdir = *pdir[i] * mat;
+          vdir = *pdir[i];
           vdir.Unit(); vdir *= 5;
-          pi.Handle3D(op,i+1,vpos,wHM_PLANE);
-          pi.Line3D(sVector31(0), sVector31(vdir.x, vdir.y, vdir.z));
+          pi.Transform3D(mat);
+          pi.Handle3D(op,i+1, *ppos[i], wHM_PLANE);
+          vdir2 = sVector31(vdir.x+vpos.x, vdir.y+vpos.y, vdir.z+vpos.z);
+          pi.Line3D(vpos, vdir2);
           break;
 
         case 2:   // point
-          vpos = *ppos[i] * mat;
-          pi.Handle3D(op, i+1, vpos, wHM_PLANE);
-          //pi.Handle3D(op, i+1, *ppos[i], wHM_PLANE);
+          vpos = *ppos[i];
+          pi.Transform3D(mat);
+          pi.Handle3D(op, i+1, *ppos[i], wHM_PLANE);
           pi.Line3D(vpos, sVector31(vpos.x, 0, vpos.z));
           break;
 
         case 3:   // spot
-          vpos = *ppos[i] * mat;
-          vdir = *pdir[i] * mat;
+          vpos = *ppos[i];
+          vdir = *pdir[i];
           vdir.Unit(); vdir *= *range[i]/2;
-          pi.Handle3D(op,i+1, vpos, wHM_PLANE);
-          sVector31 vdir2 = sVector31(vdir.x+vpos.x, vdir.y+vpos.y, vdir.z+vpos.z);
+          pi.Transform3D(mat);
+          pi.Handle3D(op, i+1, *ppos[i], wHM_PLANE);
+          vdir2 = sVector31(vdir.x+vpos.x, vdir.y+vpos.y, vdir.z+vpos.z);
           pi.Line3D(vpos, vdir2);
           break;
       }
