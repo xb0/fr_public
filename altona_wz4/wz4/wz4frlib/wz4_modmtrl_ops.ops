@@ -661,23 +661,69 @@ operator Wz4Render ModLight(?Wz4Render)
     sInt mode[8];
     sVector31 *ppos[8];
     sVector30 *pdir[8];
+    sF32 *range[8];
 
     sInt max = 0;
-    mode[max] = para->Mode0; ppos[max] = &para->Pos0; pdir[max] = &para->Dir0; max++;
-    mode[max] = para->Mode1; ppos[max] = &para->Pos1; pdir[max] = &para->Dir1; max++;
-    mode[max] = para->Mode2; ppos[max] = &para->Pos2; pdir[max] = &para->Dir2; max++;
-    mode[max] = para->Mode3; ppos[max] = &para->Pos3; pdir[max] = &para->Dir3; max++;
-    mode[max] = para->Mode4; ppos[max] = &para->Pos4; pdir[max] = &para->Dir4; max++;
-    mode[max] = para->Mode5; ppos[max] = &para->Pos5; pdir[max] = &para->Dir5; max++;
-    mode[max] = para->Mode6; ppos[max] = &para->Pos6; pdir[max] = &para->Dir6; max++;
-    mode[max] = para->Mode7; ppos[max] = &para->Pos7; pdir[max] = &para->Dir7; max++;
+    mode[max] = para->Mode0; ppos[max] = &para->Pos0; pdir[max] = &para->Dir0; range[max] = &para->Range0; max++;
+    mode[max] = para->Mode1; ppos[max] = &para->Pos1; pdir[max] = &para->Dir1; range[max] = &para->Range1; max++;
+    mode[max] = para->Mode2; ppos[max] = &para->Pos2; pdir[max] = &para->Dir2; range[max] = &para->Range2; max++;
+    mode[max] = para->Mode3; ppos[max] = &para->Pos3; pdir[max] = &para->Dir3; range[max] = &para->Range3; max++;
+    mode[max] = para->Mode4; ppos[max] = &para->Pos4; pdir[max] = &para->Dir4; range[max] = &para->Range4; max++;
+    mode[max] = para->Mode5; ppos[max] = &para->Pos5; pdir[max] = &para->Dir5; range[max] = &para->Range5; max++;
+    mode[max] = para->Mode6; ppos[max] = &para->Pos6; pdir[max] = &para->Dir6; range[max] = &para->Range6; max++;
+    mode[max] = para->Mode7; ppos[max] = &para->Pos7; pdir[max] = &para->Dir7; range[max] = &para->Range7; max++;
+
+    sSRT srt;
+    sMatrix34 mat;
+    if(para->TransformEnable)
+    {
+      srt.Scale = para->Scale;
+      srt.Rotate = para->Rot;
+      srt.Translate = para->Trans;
+    }
+    else
+    {
+      srt.Scale = sVector31(1);
+      srt.Rotate = sVector30(0);
+      srt.Translate = sVector31(0);
+    }
+    srt.MakeMatrix(mat);
+
+    sVector31 vpos;
+    sVector30 vdir;
 
     for(sInt i=0;i<max;i++)
     {
-      if((mode[i]&15)>=2) 
+      sInt type = (mode[i]&15);
+
+      switch(type)
       {
-        pi.Handle3D(op,i+1,*ppos[i],wHM_PLANE);
-        pi.Line3D(*ppos[i],sVector31(ppos[i]->x,0,ppos[i]->z));
+        case 0:   // off
+          break;
+
+        case 1:   // directionnal
+          vpos = *ppos[i];
+          vdir = *pdir[i] * mat;
+          vdir.Unit(); vdir *= 5;
+          pi.Handle3D(op,i+1,vpos,wHM_PLANE);
+          pi.Line3D(sVector31(0), sVector31(vdir.x, vdir.y, vdir.z));
+          break;
+
+        case 2:   // point
+          vpos = *ppos[i] * mat;
+          pi.Handle3D(op, i+1, vpos, wHM_PLANE);
+          //pi.Handle3D(op, i+1, *ppos[i], wHM_PLANE);
+          pi.Line3D(vpos, sVector31(vpos.x, 0, vpos.z));
+          break;
+
+        case 3:   // spot
+          vpos = *ppos[i] * mat;
+          vdir = *pdir[i] * mat;
+          vdir.Unit(); vdir *= *range[i]/2;
+          pi.Handle3D(op,i+1, vpos, wHM_PLANE);
+          sVector31 vdir2 = sVector31(vdir.x+vpos.x, vdir.y+vpos.y, vdir.z+vpos.z);
+          pi.Line3D(vpos, vdir2);
+          break;
       }
     }
   }
