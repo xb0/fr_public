@@ -839,9 +839,6 @@ operator Wz4Render ModLight(?Wz4Render)
           // init vectors
           vStart = ppos[i];
 
-          // apply global transformation
-          pi.Transform3D(mat);
-
           // update Handle pos
           *vStart *= matIndiv[i];
           pi.Handle3D(op,i+1, *vStart, wHM_PLANE);
@@ -866,9 +863,6 @@ operator Wz4Render ModLight(?Wz4Render)
           // init line length
           vEnd.Unit();
           vEnd *= *range[i]/2;
-
-          // apply global transformation
-          pi.Transform3D(mat);
 
           // update Handle pos
           *vStart *= matIndiv[i];
